@@ -660,6 +660,17 @@
     text-shadow: 1px 1px 0 #000, -1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000;
 }
 
+.win-text-inst {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    font-size: 70px;
+    font-weight: bold;
+    color: green;
+    margin-top: 100px;
+    text-shadow: 1px 1px 0 #000, -1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000;
+}
+
 .loss-text {
     position: absolute;
     top: 25%; 
@@ -670,5 +681,26 @@
     font-weight: bold;
     color: grey;
     text-shadow: 1px 1px 0 #000, -1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000;
-  }
+}
 
+.loss-text-inst {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    font-size: 70px;
+    font-weight: bold;
+    color: grey;
+    margin-top: 100px;
+    text-shadow: 1px 1px 0 #000, -1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000;
+}
+
+.text-highlight {
+    color: green;
+    font-weight: bold;
+}
+
+.parent {
+    position: relative;
+    height: 600px;
+    width: 850px;
+}

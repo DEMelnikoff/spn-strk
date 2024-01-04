@@ -271,7 +271,10 @@ const createSpinner = function(canvas, spinnerData, sectors) {
       ctx.fill();
       // TEXT
       ctx.translate(rad, rad);
-      ctx.rotate( (ang + arc / 2) + arc );
+      ctx.rotate( (arc/2) * (1 + 2*i) + Math.PI/2 );
+
+
+      //ctx.rotate( (ang + arc / 2) + arc );
       ctx.textAlign = "center";
       ctx.fillStyle = "#fff";
       if (isSpinning && i == sector) {

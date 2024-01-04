@@ -11,22 +11,24 @@ const exp = (function() {
     *
     */
 
-
+    const winRateDraw = Math.floor(Math.random() * 2);
     let settings = {
-        dv: 'flow',
-    };
-
-    if (settings.dv == 'happiness') {
-        settings.dvText = '<strong>happy</strong> you currently feel';
-    } else {
-        settings.dvText = '<strong>immersed and engaged</strong> you felt while spinning the previous wheel';
+        winRate: ['high', 'low'][winRateDraw],
+        gameType: [['binary', 'streak'], ['streak', 'binary']][Math.floor(Math.random() * 2)],
+        streakType: ['continuous', 'binary'][Math.floor(Math.random() * 2)],
+        gif: [`<img src="./img/easyWheel.gif" style="width:400px; height:400px">`, `<img src="./img/hardWheel.gif" style="width:400px; height:400px">`][winRateDraw],
+        nSpins: 2
     };
 
     jsPsych.data.addProperties({
-        dv: settings.dv,
+        gameType_1: settings.gameType[0],
+        gameType_2: settings.gameType[1],
+        streakType: settings.streakType,
+        winRate: settings.winRate,
+        nSpins: settings.nSpins,
     });
 
-    console.log(settings.dv)
+    console.log(settings.gameType, settings.streakType);
 
 
    /*
@@ -36,64 +38,294 @@ const exp = (function() {
     */
 
     const html = {
-        intro_preChk: [
+        welcome: [
+            `<div class='parent' style='text-align:left'>
+                <p><strong>What makes some activities more immersive and engaging than others?</strong></p>
+                <p>We're interested in why people feel effortlessly engaged in some activities (such as engrossing video games), but struggle to focus on other activities.</p>
+                <p>To help us, you'll play two rounds of a game called <b>Spin the Wheel</b>. After each round, you'll report how immersed and engaged you felt.</p>
+                <p>To learn about and play Spin the Wheel, continue to the next screen.</p>
+            <div>`,
+
+            `<div class='parent' style='text-align:left'>
+                <p>Throughout both rounds of Spin the Wheel, you'll be competing for a chance to win a <b>$100.00 bonus prize</b>.
+                Specifically, you'll earn tokens. The tokens you earn will be entered into a lottery, and if one of your tokens is drawn, you'll win $100.00.</p>
+                <p>To maximize your chances of winning a $100.00 bonus, you'll need to earn as many tokens as possible. Continue to learn how to earn tokens!</p>
+            </div>`,
+        ],
+
+        binary_1: [            
             `<div class='parent'>
-                <p><strong>Welcome to Spin the Wheel!</strong></p>
-                <p>In Spin the Wheel, you'll spin a series of prize wheels.</p>
-                <p>Each time you spin a prize wheel, you'll earn points.
-                <br>The number of points you earn depends on where the wheel lands.</p>
-                <p>Your goal is to earn as many points as possible by spinning the prize wheels!</p>
+                <p>In both rounds of Spin the Wheel, you'll earn tokens by spinning a prize wheel like this one.
+                <br>The wheel contains winning wedges (which are green) and losing wedges (which are gray).</p>
+                <p>To spin the wheel, simply grab it with your mouse cursor and give it a spin!</p>
+                ${settings.gif}
             </div>`,
 
             `<div class='parent'>
-                <p>To spin a prize wheel, just grab it with your cursor and give it a spin!
-                <br>Watch the animation below to see how it's done.</p>
-                <img src="./img/spinGif.gif" style="width:60%; height:60%">
+                <p>In Round 1 of Spin the Wheel, you'll earn tokens each time you land on a winning wedge.</p>
+                <p>Specifically, each time you land on a winning wedge, you'll earn 10 tokens.
+                <br>You'll earn 0 tokens each time you land on a losing wedge.</p>
             </div>`,
 
             `<div class='parent'>
-                <p>There are 18 prize wheels in total.<br>You will spin each prize wheel 5 times before continuing to the next wheel.</p>
-                <p>After spinning a wheel 5 times, you'll answer a question about your feelings.</br>
-                Specifically, you'll report how ${settings.dvText}.</p>
-            </div>`],
+                <p>If you land on a winning wedge,
+                <br>you'll see this message indicating that you earned 10 tokens.</p>
+                <div class="win-text-inst">+10 Tokens</div>
+            </div>`,
 
-        intro_postChk: [
             `<div class='parent'>
-                <p>You're ready to start playing Spin the Wheel!</p>
+                <p>If you land on a losing wedge,
+                <br>you'll see this message indicating that you earned 0 tokens.</p>
+                <div class="loss-text-inst">+0 Tokens</div>
+            </div>`,
+        ],
+
+        binary_2: [            
+            `<div class='parent'>
+                <p>Round 2 of Spin the Wheel is identical to Round 1 with one exception: Instead of earning tokens for streaks of consecutive wins, you'll earn tokens for each individual win.</p>
+                <p>Specifically, each time you land on a winning wedge, you'll earn 10 tokens.
+                You'll earn 0 tokens each time you land on a losing wedge.</p>
+            </div>`,
+
+            `<div class='parent'>
+                <p>If you land on a winning wedge,
+                <br>you'll see this message indicating that you earned 10 tokens.</p>
+                <div class="win-text-inst">+10 Tokens</div>
+            </div>`,
+
+            `<div class='parent'>
+                <p>If you land on a losing wedge,
+                <br>you'll see this message indicating that you earned 0 tokens.</p>
+                <div class="loss-text-inst">+0 Tokens</div>
+            </div>`,
+        ],
+
+        cStreak_1: [
+            `<div class='parent'>
+                <p>In both rounds of Spin the Wheel, you'll earn tokens by spinning a prize wheel like this one.
+                <br>The wheel contains winning wedges (which are green) and losing wedges (which are gray).</p>
+                <p>To spin the wheel, simply grab it with your mouse cursor and give it a spin!</p>
+                ${settings.gif}
+            </div>`,
+
+            `<div class='parent'>
+                <p>In Round 1 of Spin the Wheel, you'll earn tokens for streaks of consecutive wins.</p>
+                <p>Specifically, you'll earn 10 tokens for every consecutive spin that lands on a winning wedge. A streak of 2 is worth 20 tokens, a streak of 3 is worth 30 tokens, and so on.</p>
+            </div>`,
+            
+            `<div class='parent'>
+                <p>Throughout the game, you'll see the length of your current streak.
+                <br>For example, after three consecutive wins, you'd see the following:</p>
+                <div class="score-board">
+                    <div class="score-board-title">Current Streak:</div>
+                    <div class="score-board-score">3</div>
+                </div>
+            </div>`,
+
+            `<div class='parent'>
+                <p>Each time you land on a losing wedge,
+                <br>you'll see how many tokens you earned from your streak.</p>
+                <div class="score-board">
+                    <div class="score-board-title">Current Streak:</div>
+                    <div class="score-board-score">3</div>
+                </div>
+            </div>`,
+            
+            `<div class='parent'>
+                <p>For example, if you break a streak of three,
+                <br>you'll see this message indicating that you earned 30 tokens.</p>
+                <div class="score-board">
+                    <div class="score-board-title">Final Streak:</div>
+                    <div class="score-board-score">3</div>
+                </div>
+                <div class="win-text-inst">+30 Tokens</div>
+            </div>`,
+
+            `<div class='parent'>
+                <p>If you lose before starting a streak,
+                <br>you'll see this message indicating that you earned 0 tokens.</p>
+                <div class="score-board">
+                    <div class="score-board-title">Final Streak:</div>
+                    <div class="score-board-score">0</div>
+                </div>
+                <div class="loss-text-inst">+0 Tokens</div>
+            </div>`,
+        ],
+
+        cStreak_2: [
+            `<div class='parent'>
+                <p>Round 2 of Spin the Wheel is identical to Round 1 with one exception: Instead of earning tokens for each individual win, you'll earn tokens for streaks of consecutive wins.</p>
+                <p>Specifically, you'll earn 10 tokens for every consecutive spin that lands on a winning wedge. A streak of 2 is worth 20 tokens, a streak of 3 is worth 30 tokens, and so on.</p>
+            </div>`,
+            
+            `<div class='parent'>
+                <p>Throughout Round 2, you'll see the length of your current streak.
+                <br>For example, after three consecutive wins, you'd see the following:</p>
+                <div class="score-board">
+                    <div class="score-board-title">Current Streak:</div>
+                    <div class="score-board-score">3</div>
+                </div>
+            </div>`,
+
+            `<div class='parent'>
+                <p>Each time you land on a losing wedge,
+                <br>you'll see how many tokens you earned from your streak.</p>
+                <div class="score-board">
+                    <div class="score-board-title">Current Streak:</div>
+                    <div class="score-board-score">3</div>
+                </div>
+            </div>`,
+            
+            `<div class='parent'>
+                <p>For example, if you break a streak of three,
+                <br>you'll see this message indicating that you earned 30 tokens.</p>
+                <div class="score-board">
+                    <div class="score-board-title">Final Streak:</div>
+                    <div class="score-board-score">3</div>
+                </div>
+                <div class="win-text-inst">+30 Tokens</div>
+            </div>`,
+
+            `<div class='parent'>
+                <p>If you lose before starting a streak,
+                <br>you'll see this message indicating that you earned 0 tokens.</p>
+                <div class="score-board">
+                    <div class="score-board-title">Final Streak:</div>
+                    <div class="score-board-score">0</div>
+                </div>
+                <div class="loss-text-inst">+0 Tokens</div>
+            </div>`,
+        ],
+
+        bStreak_1: [
+            `<div class='parent'>
+                <p>In both rounds of Spin the Wheel, you'll earn tokens by spinning a prize wheel like this one.
+                <br>The wheel contains winning wedges (which are green) and losing wedges (which are gray).</p>
+                <p>To spin the wheel, simply grab it with your mouse cursor and give it a spin!</p>
+                ${settings.gif}
+            </div>`,
+
+            `<div class='parent'>
+                <p>In Round 1 of Spin the Wheel, you'll earn tokens for achieving streaks of 3 consecutive wins.</p>
+                <p>Specifically, you'll earn 30 tokens if you land on a winning wedge 3 spins in a row.
+                If you land on a losing wedge before achieving a streak of 3, you'll earn 0 tokens.</p>
+            </div>`,
+            
+            `<div class='parent'>
+                <p>Throughout the game, you'll see the length of your current streak.
+                <br>For example, after two consecutive wins, you'd see the following:</p>
+                <div class="score-board">
+                    <div class="score-board-title">Current Streak:</div>
+                    <div class="score-board-score">2 / 3</div>
+                </div>
+            </div>`,
+            
+            `<div class='parent'>
+                <p>If you achieve a streak of 3,
+                <br>you'll see this message indicating that you earned 30 tokens.</p>
+                <div class="score-board">
+                    <div class="score-board-title">Current Streak:</div>
+                    <div class="score-board-score">3 / 3</div>
+                </div>
+                <div class="win-text-inst">+30 Tokens</div>
+            </div>`,
+
+            `<div class='parent'>
+                <p>If you lose before achieving a streak of 3, you'll see this message indicating that you earned 0 tokens.</p>
+                <div class="loss-text-inst">+0 Tokens</div>
+            </div>`,
+        ],
+
+        bStreak_2: [
+            `<div class='parent'>
+                <p>Round 2 of Spin the Wheel is identical to Round 1 with one exception: Instead of earning tokens for each individual win, you'll earn tokens for achieving streaks of 3 consecutive wins.</p>
+                <p>Specifically, you'll earn 30 tokens if you land on a winning wedge 3 spins in a row. If you land on a losing wedge before achieving a streak of 3, you'll earn 0 tokens.</p>
+            </div>`,
+            
+            `<div class='parent'>
+                <p>Throughout Round 2, you'll see the length of your current streak.
+                <br>For example, after two consecutive wins, you'd see the following:</p>
+                <div class="score-board">
+                    <div class="score-board-title">Current Streak:</div>
+                    <div class="score-board-score">2 / 3</div>
+                </div>
+            </div>`,
+            
+            `<div class='parent'>
+                <p>If you achieve a streak of 3,
+                <br>you'll see this message indicating that you earned 30 tokens.</p>
+                <div class="score-board">
+                    <div class="score-board-title">Current Streak:</div>
+                    <div class="score-board-score">3 / 3</div>
+                </div>
+                <div class="win-text-inst">+30 Tokens</div>
+            </div>`,
+
+            `<div class='parent'>
+                <p>If you lose before achieving a streak of 3,
+                <br>you'll see this message indicating that you earned 0 tokens.</p>
+                <div class="loss-text-inst">+0 Tokens</div>
+            </div>`,
+        ],
+
+        readyToPlay_1: [
+            `<div class='parent'>
+                <p>You're ready to play Round 1 of Spin the Wheel!</p>
                 <p>Continue to the next screen to begin.</p>
             </div>`,      
         ],
 
-        postTask: [
+        readyToPlay_2: [
             `<div class='parent'>
-                <p>Spin the Wheel is now complete!</p>
+                <p>You're ready to play Round 2 of Spin the Wheel!</p>
+                <p>Continue to the next screen to begin.</p>
+            </div>`,      
+        ],
+
+        tasksComplete: [
+            `<div class='parent'>
+                <p>Both rounds of Spin the Wheel are now complete!</p>
                 <p>To finish this study, please continue to answer a few final questions.</p>
+            </div>`
+        ],
+
+        intro_round2: [
+            `<div class='parent'>
+                <p>Round 1 of Spin the Wheel is now complete!</p>
+                <p>Next, you'll continue to earn tokens by playing a second round of Spin the Wheel.</p>
             </div>`
         ],
     };
 
-    function MakeIntro(settings) {
+    function MakeIntro_1(settings) {
 
-        const intro_preChk = {
+        const welcomeToRound1 = {
             type: jsPsychInstructions,
-            pages: html.intro_preChk,
+            pages: html.welcome,
             show_clickable_nav: true,
             post_trial_gap: 500,
         };
 
-        const intro_postChk = {
+        const intro = {
             type: jsPsychInstructions,
-            pages: html.intro_postChk,
+            pages: function () {
+                if (settings.gameType[0] == "binary") {
+                    return html.binary_1;
+                } else if (settings.streakType == "continuous") {
+                    return html.cStreak_1;
+                } else {
+                    return html.bStreak_1;
+                }
+            },
             show_clickable_nav: true,
             post_trial_gap: 500,
         };
 
-        let correctAnswers = [`5`];
-
-        if (settings.dv == 'flow') {
-            correctAnswers.push(`My level of immersion and engagement.`);
-        } else if (settings.dv == 'happiness') {
-            correctAnswers.push(`My level of happiness.`);
+        const roundToPlay = {
+            type: jsPsychInstructions,
+            pages: html.readyToPlay_1,
+            show_clickable_nav: true,
+            post_trial_gap: 500,
         };
 
         const errorMessage = {
@@ -103,26 +335,22 @@ const exp = (function() {
             allow_keys: false,
         };
 
+        const attnChk_option = (settings.streakType == "continuous") ? `Streaks of consecutive wins.` : `Streaks of 3 consecutive wins.`;
+        const correctAnswer = (settings.gameType[0] == "binary") ? [`Each individual win.`] : [attnChk_option];
+
         const attnChk = {
             type: jsPsychSurveyMultiChoice,
-            preamble: `<div class='parent'>
-                <p>Please answer the following questions.</p>
-                </div>`,
+            preamble: `Please select the correct ending to the following sentence:`,
             questions: [
                 {
-                    prompt: "How many times will you spin each wheel before continuing to the next wheel?", 
+                    prompt: "In Round 1 of Spin the Wheel, I'll earn tokens for...", 
                     name: `attnChk1`, 
-                    options: [`1`, `2`, `5`, `10`, `20`],
-                },
-                {
-                    prompt: "What will you be answering questions about?", 
-                    name: `attnChk2`, 
-                    options: [`My level of happiness.`, `My level of immersion and engagement.`],
+                    options: [`Each individual win.`, attnChk_option],
                 },
             ],
             scale_width: 500,
             on_finish: (data) => {
-                  const totalErrors = getTotalErrors(data, correctAnswers);
+                  const totalErrors = getTotalErrors(data, correctAnswer);
                   data.totalErrors = totalErrors;
             },
         };
@@ -136,7 +364,7 @@ const exp = (function() {
         };
 
         const instLoop = {
-          timeline: [intro_preChk, attnChk, conditionalNode],
+          timeline: [intro, attnChk, conditionalNode],
           loop_function: () => {
             const fail = jsPsych.data.get().last(2).select('totalErrors').sum() > 0 ? true : false;
             return fail;
@@ -144,11 +372,93 @@ const exp = (function() {
         };
 
         const introTimeline = {
-            timeline: [instLoop, intro_postChk],
+            timeline: [welcomeToRound1, instLoop, roundToPlay],
         }
 
         this.timeline = [introTimeline];
-    }
+    };
+
+    function MakeIntro_2(settings) {
+
+
+        const welcomeToRound2 = {
+            type: jsPsychInstructions,
+            pages: html.intro_round2,
+            show_clickable_nav: true,
+            post_trial_gap: 500,
+        };
+
+        const intro = {
+            type: jsPsychInstructions,
+            pages: function () {
+                if (settings.gameType[1] == "binary") {
+                    return html.binary_2;
+                } else if (settings.streakType == "continuous") {
+                    return html.cStreak_2;
+                } else {
+                    return html.bStreak_2;
+                }
+            },
+            show_clickable_nav: true,
+            post_trial_gap: 500,
+        };
+
+        const roundToPlay = {
+            type: jsPsychInstructions,
+            pages: html.readyToPlay_2,
+            show_clickable_nav: true,
+            post_trial_gap: 500,
+        };
+
+        const errorMessage = {
+            type: jsPsychInstructions,
+            pages: [`<div class='parent'><p>You provided the wrong answer.<br>To make sure you understand Spin the Wheel, please continue to re-read the instructions.</p></div>`],
+            show_clickable_nav: true,
+            allow_keys: false,
+        };
+
+        const attnChk_option = (settings.streakType == "continuous") ? `Streaks of consecutive wins.` : `Streaks of 3 consecutive wins.`;
+        const correctAnswer = (settings.gameType[1] == "binary") ? [`Each individual win.`] : [attnChk_option];
+
+        const attnChk = {
+            type: jsPsychSurveyMultiChoice,
+            preamble: `Please select the correct ending to the following sentence:`,
+            questions: [
+                {
+                    prompt: "In Round 2 of Spin the Wheel, I'll earn tokens for...", 
+                    name: `attnChk1`, 
+                    options: [`Each individual win.`, attnChk_option],
+                },
+            ],
+            scale_width: 500,
+            on_finish: (data) => {
+                  const totalErrors = getTotalErrors(data, correctAnswer);
+                  data.totalErrors = totalErrors;
+            },
+        };
+
+        const conditionalNode = {
+          timeline: [errorMessage],
+          conditional_function: () => {
+            const fail = jsPsych.data.get().last(1).select('totalErrors').sum() > 0 ? true : false;
+            return fail;
+          },
+        };
+
+        const instLoop = {
+          timeline: [intro, attnChk, conditionalNode],
+          loop_function: () => {
+            const fail = jsPsych.data.get().last(2).select('totalErrors').sum() > 0 ? true : false;
+            return fail;
+          },
+        };
+
+        const introTimeline = {
+            timeline: [welcomeToRound2, instLoop, roundToPlay],
+        }
+
+        this.timeline = [introTimeline];
+    };
 
     p.consent = {
         type: jsPsychExternalHtml,
@@ -156,7 +466,8 @@ const exp = (function() {
         cont_btn: "advance",
     };
 
-    p.intro = new MakeIntro(settings);
+    const intro_1 = new MakeIntro_1(settings);
+    const intro_2 = new MakeIntro_2(settings);
 
     
    /*
@@ -166,25 +477,23 @@ const exp = (function() {
     */
 
 
-    // define each wedge
-    const wedges = {
-        win: {color:"red", label:"W"},
-        loss: {color:"green", label:"L"},
+    const makeWedgeArray = function(winRate) {
+        const wedges = {
+            win: {color:"green", label:"W"},
+            loss: {color:"grey", label:"L"},
+        };
+        const nWins = (winRate == "high") ? 9 : 1;
+        const nLoss = (winRate == "high") ? 1 : 9;
+        const winArray = Array(nWins).fill(wedges.win);
+        const lossArray = Array(nLoss).fill(wedges.loss);
+        const wedgeArray = winArray.concat(lossArray);
+        return wedgeArray;
     };
 
+    const wedgeArray = makeWedgeArray(settings.winRate);
 
-    // define each wheel
-    const wheels = [
+    const MakeSpinLoop = function(settings, sectors, round) {
 
-            {sectors: [ wedges.win, wedges.loss, wedges.loss, wedges.loss ], ev: 4.5, var: 1.67, arrangement: 1111},
-            {sectors: [ wedges.loss, wedges.win, wedges.win, wedges.win ], ev: 8.5, var: 1.67, arrangement: 1111},
-          
-        ];
-
-    // make spinner loop
-    const MakeSpinLoop = function(condition, sectors) {
-
-        let round = 1;  // track current round
         let outcome;
         let currentStreak = 0;
         let finalStreak = 0;
@@ -198,23 +507,28 @@ const exp = (function() {
         const spin = {
             type: jsPsychCanvasButtonResponse,
             stimulus: function(c, spinnerData) {
-                createSpinner(c, spinnerData, sectors);
+                let sectorsShuffled = jsPsych.randomization.repeat(sectors, 1);
+                createSpinner(c, spinnerData, sectorsShuffled);
             },
             canvas_size: [500, 500],
             scoreBoard: function() {
-                if (condition == "binary") {
+                if (settings.gameType[round] == "binary") {
                     return ''
                 };
-                if (condition == "streak") {
+                if (settings.gameType[round] == "streak" && settings.streakType == "continuous") {
                     return scoreBoard_html.replace('{title}', 'Current Streak:').replace('{number}', currentStreak);
-                }
+                };
+                if (settings.gameType[round] == "streak" && settings.streakType == "binary") {
+                    return scoreBoard_html.replace('{title}', 'Current Streak:').replace('{number}', `${currentStreak} / 3`);
+                };
             },
+            data: {round: round + 1},
             on_finish: function(data) {
-                data.round = round;
                 outcome = data.outcome;
                 if (outcome == "W") {
                     currentStreak++;
-                } else {
+                };
+                if (outcome == "L" || settings.gameType[round] == "streak" && settings.streakType == "binary" && currentStreak == 3) {
                     finalStreak = currentStreak;
                     currentStreak = 0;
                 };
@@ -226,7 +540,7 @@ const exp = (function() {
             stimulus: function() {
                 let standardFeedback;
 
-                if (condition == "binary") {
+                if (settings.gameType[round] == "binary") {
                     if (outcome == "W") {
                         standardFeedback = '<div class="score-board-blank"></div> <div class="feedback-area"> <div class="win-text">+10 Tokens</div> </div>';
                     } else {
@@ -234,85 +548,160 @@ const exp = (function() {
                     }
                 };
 
-                if (condition == "streak") {
+                if (settings.gameType[round] == "streak" && settings.streakType == "continuous") {
                     if (outcome == "W") {
-                        standardFeedback = scoreBoard_html.replace('{title}', 'Current Streak:').replace('{number}', `<span style="color:green; font-weight:bold">${currentStreak}</span>`) + `<div class="feedback-area"></div>`;
+                        standardFeedback = scoreBoard_html.replace('{title}', 'Current Streak:').replace('{number}', `<span class="text-highlight">${currentStreak}</span>`) + `<div class="feedback-area"></div>`;
                     } else if (finalStreak > 0) {
-                        standardFeedback = scoreBoard_html.replace('{title}', 'Final Streak:').replace('{number}', finalStreak) + `<div class="feedback-area"> <div class="win-text">+${10 * finalStreak} Tokens</div> </div>`;
+                        standardFeedback = scoreBoard_html.replace('{title}', 'Final Streak:').replace('{number}', `<span class="text-highlight">${finalStreak}</span>`) + `<div class="feedback-area"> <div class="win-text">+${10 * finalStreak} Tokens</div> </div>`;
                     } else {
                         standardFeedback = scoreBoard_html.replace('{title}', 'Final Streak:').replace('{number}', finalStreak) + `<div class="feedback-area"> <div class="loss-text">+${10 * finalStreak} Tokens</div> </div>`;
                     }
                 };
+
+                if (settings.gameType[round] == "streak" && settings.streakType == "binary") {
+                    if (outcome == "W" && finalStreak == 3) {
+                        standardFeedback = scoreBoard_html.replace('{title}', 'Current Streak:').replace('{number}', `<span class="text-highlight">${finalStreak}</span> / <span class="text-highlight">3</span>`) + `<div class="feedback-area"> <div class="win-text">+${10 * finalStreak} Tokens</div> </div>`;
+                    } else if (outcome == "W" && finalStreak < 3) {
+                        standardFeedback = scoreBoard_html.replace('{title}', 'Current Streak:').replace('{number}', `<span class="text-highlight">${currentStreak}</span> / 3`) + `<div class="feedback-area"></div>`;
+                    } else {
+                        standardFeedback = scoreBoard_html.replace('{title}', 'Final Streak:').replace('{number}', `${finalStreak} / 3`) + `<div class="feedback-area"> <div class="loss-text">+0 Tokens</div> </div>`;
+                    }                  
+                }
 
                 return standardFeedback;
 
             },
             choices: "NO_KEYS",
             trial_duration: 2000,
+            data: {round: round + 1},
+            on_finish: function() {
+                if (settings.gameType[round] == "streak" && settings.streakType == "binary" && finalStreak == 3) {
+                    finalStreak = 0;
+                };
+            },
         };
 
         this.timeline = [spin, tokens];
-        this.repetitions = 50;
+        this.repetitions = settings.nSpins;
     }
-
     
+    const spin_round1 = new MakeSpinLoop(settings, wedgeArray, 0)
+    const spin_round2 = new MakeSpinLoop(settings, wedgeArray, 1)
 
-    // trial: flow DV
-    const flowMeasure = {
-        type: jsPsychSurveyLikert,
-        questions: [
-            {prompt: `During the last round of Spin the Wheel,<br>to what extent did you feel immersed and engaged in what you were doing?`,
-            name: `dv_value`,
-            labels: ['0<br>A little', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10<br>Extremely']},
-        ],
-        randomize_question_order: false,
-        scale_width: 600,
-        data: {ev: jsPsych.timelineVariable('ev'), var: jsPsych.timelineVariable('var'), arrangement: jsPsych.timelineVariable('arrangement')},
-        on_finish: function(data) {
-            data.round = round;
-            let scoreArray = jsPsych.data.get().select('score').values;
-            let outcomesArray = jsPsych.data.get().select('outcomes').values;
-            data.score = scoreArray[scoreArray.length - 1];
-            data.outcomes = outcomesArray[outcomesArray.length - 1];
+   /*
+    *
+    *   DVs
+    *
+    */
+
+
+    const zeroToExtremely = ["0<br>A little", '1', '2', '3', '4', '5', '6', '7', '8', '9', "10<br>Extremely"];
+    const zeroToALot = ['0<br>A little', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10<br>A lot'];
+
+    // constructor functions
+    function MakeFlowQs(round) {
+        const secondVersion = (round == 1) ? 'Round 1' : 'Round 2';
+        this.type = jsPsychSurveyLikert;
+        this.preamble = `<div style='padding-top: 50px; width: 850px; font-size:16px; color:rgb(109, 112, 114)'>
+        <p>Thank you for completing ${secondVersion} of Spin the Wheel!</p>
+        <p>During ${secondVersion} of Spin the Wheel, to what extent did you feel<br><b>immersed</b> and <b>engaged</b> in what you were doing?</p>
+        <p>Report the degree to which you felt immersed and engaged by answering the following questions.</p></div>`;
+        this.questions = [
+            {
+                prompt: `<div style='color:rgb(109, 112, 114)'>During ${secondVersion} of Spin the Wheel, how <strong>absorbed</strong> did you feel in what you were doing?</div>`,
+                name: `absorbed`,
+                labels: ["0<br>Not very absorbed", '1', '2', '3', '4', '5', '6', '7', '8', '9', "10<br>More absorbed than I've ever felt"],
+                required: true,
+            },
+            {
+                prompt: `<div style='color:rgb(109, 112, 114)'>During ${secondVersion} of Spin the Wheel, how <strong>immersed</strong> did you feel in what you were doing?</div>`,
+                name: `immersed`,
+                labels: ["0<br>Not very immersed", '1', '2', '3', '4', '5', '6', '7', '8', '9', "10<br>More immersed than I've ever felt"],
+                required: true,
+            },
+            {
+                prompt: `<div style='color:rgb(109, 112, 114)'>During ${secondVersion} of Spin the Wheel, how <strong>engaged</strong> did you feel in what you were doing?</div>`,
+                name: `engaged`,
+                labels: ["0<br>Not very engaged", '1', '2', '3', '4', '5', '6', '7', '8', '9', "10<br>More engaged than I've ever felt"],
+                required: true,
+            },
+            {
+                prompt: `<div style='color:rgb(109, 112, 114)'>During ${secondVersion} of Spin the Wheel, how <strong>engrossed</strong> did you feel in what you were doing?</div>`,
+                name: `engrossed`,
+                labels: ["0<br>Not very engrossed", '1', '2', '3', '4', '5', '6', '7', '8', '9', "10<br>More engrossed than I've ever felt"],
+                required: true,
+            },
+        ];
+        this.randomize_question_order = false;
+        this.scale_width = 700;
+        this.data = {round: round};
+        this.on_finish = (data) => {
             saveSurveyData(data);
-        }
+        };
     };
 
-    // trial: happiness DV
-    const happinessMeasure = {
-        type: jsPsychSurveyLikert,
-        questions: [
-            {prompt: `How happy are you right now?`,
-            name: `dv_value`,
-            labels: ['0<br>Very unhappy', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10<br>Very happy']},
-        ],
-        randomize_question_order: false,
-        scale_width: 600,
-        data: {ev: jsPsych.timelineVariable('ev'), var: jsPsych.timelineVariable('var'), arrangement: jsPsych.timelineVariable('arrangement')},
-        on_finish: function(data) {
-            data.round = round;
-            let scoreArray = jsPsych.data.get().select('score').values;
-            let outcomesArray = jsPsych.data.get().select('outcomes').values;
-            data.score = scoreArray[scoreArray.length - 2];
-            data.outcomes = outcomesArray[outcomesArray.length - 2];
+    function MakeEnjoyQs(round) {
+        const secondVersion = (round == 1) ? 'Round 1' : 'Round 2';
+        this.type = jsPsychSurveyLikert;
+        this.preamble = `<div style='padding-top: 50px; width: 850px; font-size:16px; color:rgb(109, 112, 114)'>
+
+        <p>Below are a few more questions about ${secondVersion} of Spin the Wheel.</p>
+
+        <p>Instead of asking about immersion and engagement, these questions ask about <strong>enjoyment</strong>.<br>
+        Report how much you <strong>enjoyed</strong> ${secondVersion} of Spin the Wheel by answering the following questions.</p></div>`;
+        this.questions = [
+            {
+                prompt: `<div style='color:rgb(109, 112, 114)'>How much did you <strong>enjoy</strong> playing ${secondVersion} of Spin the Wheel?</div>`,
+                name: `enjoyable`,
+                labels: zeroToALot,
+                required: true,
+            },
+            {
+                prompt: `<div style='color:rgb(109, 112, 114)'>How much did you <strong>like</strong> playing ${secondVersion} of Spin the Wheel?</div>`,
+                name: `like`,
+                labels: zeroToALot,
+                required: true,
+            },
+            {
+                prompt: `<div style='color:rgb(109, 112, 114)'>How much did you <strong>dislike</strong> playing ${secondVersion} of Spin the Wheel?</div>`,
+                name: `dislike`,
+                labels: zeroToALot,
+                required: true,
+            },
+            {
+                prompt: `<div style='color:rgb(109, 112, 114)'>How much <strong>fun</strong> did you have playing ${secondVersion} of Spin the Wheel?</div>`,
+                name: `fun`,
+                labels: zeroToALot,
+                required: true,
+            },
+            {
+                prompt: `<div style='color:rgb(109, 112, 114)'>How <strong>entertaining</strong> was ${secondVersion} of Spin the Wheel?</div>`,
+                name: `entertaining`,
+                labels: zeroToExtremely,
+                required: true,
+            },
+        ];
+        this.randomize_question_order = false;
+        this.scale_width = 700;
+        this.data = {round: round};
+        this.on_finish = (data) => {
             saveSurveyData(data);
-            round++;
-        }
+        };
     };
 
-    // flow proneness
+   /*
+    *
+    *   TIMELINES
+    *
+    */
 
-
-    // timeline: main task
-
-    let dv;
-    if (settings.dv == "happiness") {
-        dv = happinessMeasure;
-    } else {
-        dv = flowMeasure;
+    p.round_1 = {
+        timeline: [ intro_1, spin_round1, new MakeFlowQs(1), new MakeEnjoyQs(1)],
     };
 
-    p.task = new MakeSpinLoop("binary", [ wedges.loss, wedges.win, wedges.loss, wedges.win, wedges.loss, wedges.win, wedges.loss, wedges.win ])
+    p.round_2 = {
+        timeline: [ intro_2, spin_round2, new MakeFlowQs(2), new MakeEnjoyQs(2)],
+    };
 
    /*
     *
@@ -328,101 +717,6 @@ const exp = (function() {
             pages: html.postTask,
             show_clickable_nav: true,
             post_trial_gap: 500,
-        };
-
-        const genFlowScale = ['-2<br>Totally<br>Disagree', '-1<br>Disagree', '0<br>Neither agree<br>nor disagree', '1<br>Agree', '2<br>Totally<br>Agree'];
-
-        const flowGenQuestions = {
-            type: jsPsychSurveyLikert,
-            preamble:
-                `<div style='padding-top: 50px; width: 900px; font-size:16px'>
-                    <p>Please express the extent to which you disagree or agree with each statement.</p>
-                </div>`,
-            questions: [
-                {
-                    prompt: `I enjoy challenging tasks/activities that require a lot of focus.`,
-                    name: `genFlow_1`,
-                    labels: genFlowScale,
-                    required: true,
-                },
-                {
-                    prompt: `When I am focused on a task/activity, I quickly tend to forget my surroundings (other people, time, and place).`,
-                    name: `genFlow_2`,
-                    labels: genFlowScale,
-                    required: true,
-                },
-                {
-                    prompt: `I usually experience a good flow when I do something (things that are neither too easy nor too difficult for me).`,
-                    name: `genFlow_3`,
-                    labels: genFlowScale,
-                    required: true,
-                },
-                {
-                    prompt: `I have several different areas of interest.`,
-                    name: `genFlow_4`,
-                    labels: genFlowScale,
-                    required: true,
-                },
-                {
-                    prompt: `It is difficult for me to walk away from or quit a project I am currently working on.`,
-                    name: `genFlow_5`,
-                    labels: genFlowScale,
-                    required: true,
-                },
-                {
-                    prompt: `I become stressed in the face of difficult/challenging tasks.`,
-                    name: `genFlow_6r`,
-                    labels: genFlowScale,
-                    required: true,
-                },
-                {
-                    prompt: `It is difficult for me to maintain concentration over time.`,
-                    name: `genFlow_7r`,
-                    labels: genFlowScale,
-                    required: true,
-                },
-                {
-                    prompt: `I quickly become tired of the things I do.`,
-                    name: `genFlow_8r`,
-                    labels: genFlowScale,
-                    required: true,
-                },
-                {
-                    prompt: `I am usually satisfied with the results of my efforts across various tasks (I experience feelings of mastery).`,
-                    name: `genFlow_9`,
-                    labels: genFlowScale,
-                    required: true,
-                },
-                {
-                    prompt: `When I focus on something, I often forget to take a break.`,
-                    name: `genFlow_10`,
-                    labels: genFlowScale,
-                    required: true,
-                },
-                {
-                    prompt: `I get bored easily.`,
-                    name: `genFlow_11r`,
-                    labels: genFlowScale,
-                    required: true,
-                },
-                {
-                    prompt: `My daily tasks are exhausting rather than stimulating.`,
-                    name: `genFlow_12r`,
-                    labels: genFlowScale,
-                    required: true,
-                },
-                {
-                    prompt: `I develop an interest for most of the things I do in life.`,
-                    name: `genFlow_13`,
-                    labels: genFlowScale,
-                    required: true,
-                },
-            ],
-            randomize_question_order: false,
-            scale_width: 500,
-            on_finish: (data) => {
-                saveSurveyData(data); 
-            },
         };
 
         const gender = {
@@ -477,7 +771,7 @@ const exp = (function() {
         }; 
 
         const demos = {
-            timeline: [taskComplete, flowGenQuestions, gender, age, ethnicity, english, finalWord, pid]
+            timeline: [taskComplete, gender, age, ethnicity, english, finalWord, pid]
         };
 
         return demos;
@@ -503,6 +797,6 @@ const exp = (function() {
 
 }());
 
-const timeline = [exp.consent, exp.intro, exp.task, exp.demographics, exp.save_data];
+const timeline = [exp.round_1, exp.round_2, exp.consent, exp.demographics, exp.save_data];
 
 jsPsych.run(timeline);
