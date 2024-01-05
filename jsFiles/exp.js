@@ -14,10 +14,11 @@ const exp = (function() {
     const winRateDraw = Math.floor(Math.random() * 2);
     let settings = {
         winRate: ['high', 'low'][winRateDraw],
+        wedgeText: [['9 winning wedges (which are green)', '1 losing wedge (which is gray)'], ['1 winning wedge (which is green)', '9 losing wedges (which are gray)']][winRateDraw],
         gameType: [['binary', 'streak'], ['streak', 'binary']][Math.floor(Math.random() * 2)],
         streakType: ['continuous', 'binary'][Math.floor(Math.random() * 2)],
         gif: [`<img src="./img/easyWheel.gif" style="width:400px; height:400px">`, `<img src="./img/hardWheel.gif" style="width:400px; height:400px">`][winRateDraw],
-        nSpins: 5
+        nSpins: 30,
     };
 
     jsPsych.data.addProperties({
@@ -56,7 +57,7 @@ const exp = (function() {
         binary_1: [            
             `<div class='parent'>
                 <p>In both rounds of Spin the Wheel, you'll earn tokens by spinning a prize wheel like this one.
-                <br>The wheel contains winning wedges (which are green) and losing wedges (which are gray).</p>
+                <br>The wheel contains ${settings.wedgeText[0]} and ${settings.wedgeText[1]}.</p>
                 <p>To spin the wheel, simply grab it with your mouse cursor and give it a spin!</p>
                 ${settings.gif}
             </div>`,
@@ -103,7 +104,7 @@ const exp = (function() {
         cStreak_1: [
             `<div class='parent'>
                 <p>In both rounds of Spin the Wheel, you'll earn tokens by spinning a prize wheel like this one.
-                <br>The wheel contains winning wedges (which are green) and losing wedges (which are gray).</p>
+                <br>The wheel contains ${settings.wedgeText[0]} and ${settings.wedgeText[1]}.</p>
                 <p>To spin the wheel, simply grab it with your mouse cursor and give it a spin!</p>
                 ${settings.gif}
             </div>`,
@@ -200,7 +201,7 @@ const exp = (function() {
         bStreak_1: [
             `<div class='parent'>
                 <p>In both rounds of Spin the Wheel, you'll earn tokens by spinning a prize wheel like this one.
-                <br>The wheel contains winning wedges (which are green) and losing wedges (which are gray).</p>
+                <br>The wheel contains ${settings.wedgeText[0]} and ${settings.wedgeText[1]}.</p>
                 <p>To spin the wheel, simply grab it with your mouse cursor and give it a spin!</p>
                 ${settings.gif}
             </div>`,
@@ -231,7 +232,8 @@ const exp = (function() {
             </div>`,
 
             `<div class='parent'>
-                <p>If you lose before achieving a streak of 3, you'll see this message indicating that you earned 0 tokens.</p>
+                <p>If you lose before achieving a streak of 3,
+                <br>you'll see this message indicating that you earned 0 tokens.</p>
                 <div class="loss-text-inst">+0 Tokens</div>
             </div>`,
         ],
@@ -508,7 +510,6 @@ const exp = (function() {
         const spin = {
             type: jsPsychCanvasButtonResponse,
             stimulus: function(c, spinnerData) {
-                console.log(trial);
                 let sectorsShuffled = (trial == settings.nSpins) ? sectors : jsPsych.randomization.repeat(sectors, 1);
                 let loss = (trial == settings.nSpins) ? true : false;
                 createSpinner(c, spinnerData, sectorsShuffled, loss);
@@ -720,7 +721,7 @@ const exp = (function() {
 
         const taskComplete = {
             type: jsPsychInstructions,
-            pages: html.postTask,
+            pages: html.tasksComplete,
             show_clickable_nav: true,
             post_trial_gap: 500,
         };
@@ -803,6 +804,6 @@ const exp = (function() {
 
 }());
 
-const timeline = [exp.round_1, exp.round_2, exp.consent, exp.demographics, exp.save_data];
+const timeline = [exp.consent, exp.round_1, exp.round_2, exp.demographics, exp.save_data];
 
 jsPsych.run(timeline);
