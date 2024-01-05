@@ -17,7 +17,7 @@ const exp = (function() {
         gameType: [['binary', 'streak'], ['streak', 'binary']][Math.floor(Math.random() * 2)],
         streakType: ['continuous', 'binary'][Math.floor(Math.random() * 2)],
         gif: [`<img src="./img/easyWheel.gif" style="width:400px; height:400px">`, `<img src="./img/hardWheel.gif" style="width:400px; height:400px">`][winRateDraw],
-        nSpins: 2
+        nSpins: 5
     };
 
     jsPsych.data.addProperties({
@@ -497,6 +497,7 @@ const exp = (function() {
         let outcome;
         let currentStreak = 0;
         let finalStreak = 0;
+        let trial = 1;
 
         const scoreBoard_html = `<div class="score-board">
             <div class="score-board-title">{title}</div>
@@ -507,8 +508,10 @@ const exp = (function() {
         const spin = {
             type: jsPsychCanvasButtonResponse,
             stimulus: function(c, spinnerData) {
-                let sectorsShuffled = jsPsych.randomization.repeat(sectors, 1);
-                createSpinner(c, spinnerData, sectorsShuffled);
+                console.log(trial);
+                let sectorsShuffled = (trial == settings.nSpins) ? sectors : jsPsych.randomization.repeat(sectors, 1);
+                let loss = (trial == settings.nSpins) ? true : false;
+                createSpinner(c, spinnerData, sectorsShuffled, loss);
             },
             canvas_size: [500, 500],
             scoreBoard: function() {
@@ -524,6 +527,7 @@ const exp = (function() {
             },
             data: {round: round + 1},
             on_finish: function(data) {
+                data.trial = trial;
                 outcome = data.outcome;
                 if (outcome == "W") {
                     currentStreak++;
@@ -574,10 +578,12 @@ const exp = (function() {
             choices: "NO_KEYS",
             trial_duration: 2000,
             data: {round: round + 1},
-            on_finish: function() {
+            on_finish: function(data) {
+                data.trial = trial
                 if (settings.gameType[round] == "streak" && settings.streakType == "binary" && finalStreak == 3) {
                     finalStreak = 0;
                 };
+                trial++;
             },
         };
 

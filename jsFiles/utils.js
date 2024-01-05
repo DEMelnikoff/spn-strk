@@ -47,7 +47,7 @@ const getTotalErrors = (data, correctAnswers) => {
 };
 
 // code for spinner task
-const createSpinner = function(canvas, spinnerData, sectors) {
+const createSpinner = function(canvas, spinnerData, sectors, lose) {
 
   /* get context */
   const ctx = canvas.getContext("2d"); 
@@ -66,7 +66,7 @@ const createSpinner = function(canvas, spinnerData, sectors) {
   const arc = (2 * PI) / tot; // arc sizes in radians
 
   /* spin dynamics */
-  const friction = 0.98;  // 0.995=soft, 0.99=mid, 0.98=hard
+  let friction = 0.98;  // 0.995=soft, 0.99=mid, 0.98=hard
   const angVelMin = 5; // Below that number will be treated as a stop
   let angVelMax = 0; // Random ang.vel. to acceletare to 
   let angVel = 0;    // Current angular velocity
@@ -80,10 +80,12 @@ const createSpinner = function(canvas, spinnerData, sectors) {
   let correctSpeed = [0]       // speed corrected for 360-degree limit
   let startAngle = null;       // angle of grab
   let oldAngle = 0;            // wheel angle prior to last perturbation
+  let oldAngle_corrected;
   let currentAngle = null;     // wheel angle after last perturbation
   let onWheel = false;         // true when cursor is on wheel, false otherwise
   let spin_num = 5             // number of spins
-
+  let liveSectorLabel;
+  let direction;
 
   /* define spinning functions */
 
@@ -132,9 +134,13 @@ const createSpinner = function(canvas, spinnerData, sectors) {
       oldAngle = currentAngle;
       let speed = correctSpeed[0];
       if (Math.abs(speed) > angVelMin) {
+        direction = (speed > 0) ? 1 : -1;
         isAccelerating = true;
         isSpinning = true;
         angVelMax = rand(25, 50);
+        if (lose) {
+          speed = (direction == 1) ? Math.min(speed, 25) : Math.max(speed, -25);
+        };
         giveMoment(speed)
       };
     };   
@@ -143,11 +149,24 @@ const createSpinner = function(canvas, spinnerData, sectors) {
   const giveMoment = function(speed) {
 
     // stop accelerating when max speed is reached
-    if (Math.abs(speed) >= angVelMax) isAccelerating = false;
+    if (lose) {
+      if (Math.abs(speed) >= 29.5 && liveSectorLabel == "L") isAccelerating = false;
+    } else {
+      if (Math.abs(speed) >= angVelMax) isAccelerating = false;
+    }
+
+    let liveSector = sectors[getIndex(oldAngle)];
+    liveSectorLabel = liveSector.label;
+    oldAngle_corrected = (oldAngle < 0) ? 360 + (oldAngle % 360) : oldAngle % 360;
+
 
     // accelerate
     if (isAccelerating) {
-      speed *= 1.06; // Accelerate
+      if (lose) {
+        speed = (direction == 1) ? Math.min(speed * 1.06, 29.5) : Math.max(speed * 1.06, -29.5);
+      } else {
+        speed *= 1.06
+      };
       const req = window.requestAnimationFrame(giveMoment.bind(this, speed));
       oldAngle += speed;
       lastAngles.shift();
@@ -160,7 +179,13 @@ const createSpinner = function(canvas, spinnerData, sectors) {
       isAccelerating = false;
       speed *= friction; // Decelerate by friction  
       const req = window.requestAnimationFrame(giveMoment.bind(this, speed));
-      if (Math.abs(speed) > angVelMin * .1) {
+
+      if ( (Math.abs(speed) > angVelMin * .2) || (Math.abs(speed) > angVelMin * .05 && oldAngle_corrected < 275) || (Math.abs(speed) > angVelMin * .05 && oldAngle_corrected > 300) ) {
+        oldAngle += speed;
+        lastAngles.shift();
+        lastAngles.push(oldAngle);
+        render(oldAngle);  
+      } else if (!lose && Math.abs(speed) > angVelMin * .1) {
         // decelerate
         oldAngle += speed;
         lastAngles.shift();
@@ -169,10 +194,11 @@ const createSpinner = function(canvas, spinnerData, sectors) {
       } else {
         // stop spinner
         speed = 0;
+        friction = .98;
         currentAngle = oldAngle;
-        let sector = sectors[getIndex()];
+        let sector = sectors[getIndex(currentAngle)];
         spinnerData.outcome = sector.label;
-        drawSector(sectors, getIndex());
+        drawSector(sectors, getIndex(currentAngle));
         updateScore(parseFloat(sector.label), sector.color);
         window.cancelAnimationFrame(req);
       };
@@ -193,9 +219,9 @@ const createSpinner = function(canvas, spinnerData, sectors) {
     }, 1000);
   };
 
-  const getIndex = () => {
+  const getIndex = (x) => {
     let normAngle = 0;
-    let modAngle = currentAngle % 360;
+    let modAngle = x % 360;
     if (modAngle > 270) {
       normAngle = 360 - modAngle + 270;
     } else if (modAngle < -90) { 
@@ -271,7 +297,8 @@ const createSpinner = function(canvas, spinnerData, sectors) {
       ctx.fill();
       // TEXT
       ctx.translate(rad, rad);
-      ctx.rotate( (arc/2) * (1 + 2*i) + Math.PI/2 );
+      let rotation = (arc/2) * (1 + 2*i) + Math.PI/2
+      ctx.rotate( rotation );
 
 
       //ctx.rotate( (ang + arc / 2) + arc );
