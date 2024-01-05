@@ -11,7 +11,7 @@ const exp = (function() {
     *
     */
 
-    const winRateDraw = Math.floor(Math.random() * 2);
+    const winRateDraw = 0;
     let settings = {
         winRate: ['high', 'low'][winRateDraw],
         wedgeText: [['9 winning wedges (which are green)', '1 losing wedge (which is gray)'], ['1 winning wedge (which is green)', '9 losing wedges (which are gray)']][winRateDraw],
